@@ -15,6 +15,5 @@
             "type": "coreclr",
             "request": "attach"
         }
-
     ]
 }
