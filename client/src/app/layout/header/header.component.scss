@@ -13,6 +13,12 @@
 
 }
 
+a {
+    &.active{
+        color: #7d00fa;
+    }
+}
+
 ::ng-deep .mat-badge-content {
     border-radius: 50px !important;
     color: white !important;
