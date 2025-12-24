@@ -31,29 +31,33 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
     return ConnectionMultiplexer.Connect(configuration);
 });
 
-builder.Services.AddSingleton<ICartService,CartService>();
+builder.Services.AddSingleton<ICartService, CartService>();
+
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<AppUser>().AddEntityFrameworkStores<StoreContext>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200", "https://localhost:4200"));
+app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:4200", "https://localhost:4200"));
 // Configure the HTTP request pipeline.
 app.MapControllers();
+app.MapGroup("api").MapIdentityApi<AppUser>();
 
-// try
-// {
-//     using var scope = app.Services.CreateScope();
-//     var services = scope.ServiceProvider;
-//     var context = services.GetRequiredService<StoreContext>();
-//     await context.Database.MigrateAsync();
-//     await StoreContextSeed.SeedAsync(context);
-// }
-// catch (System.Exception ex)
-// {
-//     Console.WriteLine(ex);
-//     throw;
-// }
+try
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<StoreContext>();
+    await context.Database.MigrateAsync();
+    await StoreContextSeed.SeedAsync(context);
+}
+catch (System.Exception ex)
+{
+    Console.WriteLine(ex);
+    throw;
+}
 
 app.Run();
